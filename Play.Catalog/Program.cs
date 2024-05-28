@@ -4,8 +4,8 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using Play.Catalog.Service.Entities;
-using Play.Catalog.Service.Settings;
 using Play.Common;
+using Play.Common.MassTransit;
 using Play.Common.MongoDB;
 using Play.Common.Settings;
 
@@ -22,16 +22,7 @@ var serviceSettings = builder.Configuration.GetSection(nameof(ServiceSettings)).
 
 builder.Services.AddMongo();
 builder.Services.AddMongoRepository<Item>("items");
-builder.Services.AddMassTransit(x =>
-{
-	x.UsingRabbitMq((context, configurator) =>
-	{
-		var rabbitMQSettings = builder.Configuration.GetSection(nameof(RabbitMQSettings)).Get<RabbitMQSettings>();
-		configurator.Host(rabbitMQSettings!.Host);
-		configurator.ConfigureEndpoints(context, new KebabCaseEndpointNameFormatter(serviceSettings!.ServiceName,
-		 includeNamespace: false));
-	});
-});
+builder.Services.AddMassTransitWithRabbitMq();
 
 builder.Services.AddControllers(options =>
 {
